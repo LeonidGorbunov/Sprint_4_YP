@@ -16,10 +16,10 @@ public class SamokatMainPage {
     //локаторы
     //куки попапа
     private final By cookieConfirmationButton = By.id("rcc-confirm-button");
-    //шаблон локатора заголовков аккордеона
-    private final String headingTemplate = "accordion__heading-";
-    //шаблон локатора текстовых блоков аккордеона
-    private final String panelTemplate = "accordion__panel-";
+    //шаблон для текстовых заголовков аккордеона
+    private final String accordionTextHeadingTemplate = "//div[contains(@class, 'accordion__button') and contains(text(), '%s')]";
+    //шаблон текстовых блоков ответов аккордеона
+    private final String accordionTextPanelTemplate = "//div[contains(@class, 'accordion__button') and contains(text(), '%s')]/ancestor::div[contains(@class, 'accordion__item')]//div[contains(@class, 'accordion__panel')]";
     //верхняя кнопка Заказать
     private final By topOrderButton = By.xpath("//div[contains(@class, 'Header_Nav')]//button[normalize-space(text())='Заказать']");
     //нижняя кнопка Заказать
@@ -37,30 +37,36 @@ public class SamokatMainPage {
         this.driver = driver;
     }
 
-    public void clickAccordionHeading(int accordionIndex) {
+    public void clickAccordionHeading(String accordionQuestionText) {
 
-        //локатор для заголовков аккордеона
-        By headingLocator = By.id(headingTemplate + accordionIndex);
+        //локатор для текстовых заголовков аккордеона
+        String questionXpath = String.format(accordionTextHeadingTemplate, accordionQuestionText);
+        By questionLocator = By.xpath(questionXpath);
 
         new WebDriverWait(driver, Duration.ofSeconds(15))
-                .until(ExpectedConditions.elementToBeClickable(headingLocator))
+                .until(ExpectedConditions.elementToBeClickable(questionLocator))
                 .click();
     }
 
-    public String getAccordionPanelText(int accordionIndex) {
+    public String getAccordionPanelText(String accordionQuestionText) {
 
         //локатор для текстовых блоков аккордеона
-        By panelLocator = By.id(panelTemplate + accordionIndex);
+        String panelXpath = String.format(accordionTextPanelTemplate, accordionQuestionText);
+        By panelLocator = By.xpath(panelXpath);
 
         return new WebDriverWait(driver, Duration.ofSeconds(15))
                 .until(ExpectedConditions.visibilityOfElementLocated(panelLocator))
                 .getText();
     }
 
-    public void scrollToAccordion(int accordionIndex) {
-        By currentHeading = By.id(headingTemplate + accordionIndex);
+    public void scrollToAccordion(String accordionQuestionText) {
+
+        //локатор для текстовых заголовков аккордеона
+        String questionXpath = String.format(accordionTextHeadingTemplate, accordionQuestionText);
+        By questionLocator = By.xpath(questionXpath);
+
         WebElement element = new WebDriverWait(driver, Duration.ofSeconds(15))
-                .until(ExpectedConditions.presenceOfElementLocated(currentHeading));
+                .until(ExpectedConditions.presenceOfElementLocated(questionLocator));
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({behavior: 'instant', block: 'center'});", element);
     }
 
@@ -109,5 +115,18 @@ public class SamokatMainPage {
         new WebDriverWait(driver, Duration.ofSeconds(15))
                 .until(ExpectedConditions.elementToBeClickable(goButton))
                 .click();
+    }
+
+    public void clickYandexLogoAndSwitchToIt() {
+        String samokatWindow = driver.getWindowHandle();
+        yandexLogoClick();
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.numberOfWindowsToBe(2));
+        for (String windowHandle : driver.getWindowHandles()) {
+            if (!samokatWindow.equals(windowHandle)) {
+                driver.switchTo().window(windowHandle);
+                break;
+            }
+        }
     }
 }

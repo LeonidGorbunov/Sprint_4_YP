@@ -1,23 +1,17 @@
 package ru.praktikum_services.qa_scooter.tests;
 
-import ru.praktikum_services.qa_scooter.driverfactory.WebDriverFactory;
 import ru.praktikum_services.qa_scooter.pageobject.SamokatMainPage;
 import ru.praktikum_services.qa_scooter.pageobject.SamokatOrderFirstPage;
 import ru.praktikum_services.qa_scooter.pageobject.SamokatOrderSecondPage;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openqa.selenium.WebDriver;
 import static org.junit.Assert.assertTrue;
-import java.time.Duration;
 
 @RunWith(Parameterized.class)
-public class SamokatOrderTest {
+public class SamokatOrderTest extends TestTemplate {
 
-    private WebDriver driver;
     private final String name;
     private final String surname;
     private final String address;
@@ -51,6 +45,7 @@ public class SamokatOrderTest {
     }
 
     private void runOrderFlow() {
+
         SamokatOrderFirstPage firstPage = new SamokatOrderFirstPage(driver);
         firstPage.enterName(name);
         firstPage.enterSurname(surname);
@@ -70,33 +65,24 @@ public class SamokatOrderTest {
         assertTrue("Модальное окно подтверждения заказа не появляется!", secondPage.isOrderCreatedSuccessfully());
     }
 
-    @Before
-    public void setUp() {
-        String browser = System.getProperty("browser", "chrome");
-        driver = WebDriverFactory.driverSelect(browser);
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(40));
-        driver.manage().window().maximize();
-        driver.get("https://qa-scooter.praktikum-services.ru/");
-    }
-
     @Test
     public void checkOrderFlowFromTopButton() {
+
         SamokatMainPage mainPage = new SamokatMainPage(driver);
         mainPage.cookieConfirmationButtonClick();
         mainPage.clickTopOrderButton();
+
         runOrderFlow();
     }
 
     @Test
     public void checkOrderFlowFromBottomButton() {
+
         SamokatMainPage mainPage = new SamokatMainPage(driver);
         mainPage.cookieConfirmationButtonClick();
         mainPage.clickBottomOrderButton();
+
         runOrderFlow();
     }
 
-    @After
-    public void tearDown () {
-        driver.quit();
-    }
 }
