@@ -3,6 +3,7 @@ package ru.praktikum_services.qa_scooter.pageobject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
@@ -24,7 +25,7 @@ public class SamokatMainPage {
     private final By topOrderButton = By.xpath("//div[contains(@class, 'Header_Nav')]//button[normalize-space(text())='Заказать']");
     //нижняя кнопка Заказать
     private final By bottomOrderButton = By.xpath("//div[contains(@class, 'Home_ThirdPart')]//button[normalize-space(text())='Заказать']");
-    //логитип Яндекс
+    //логотип Яндекс
     private final By yandexLogo = By.xpath("//a[contains(@class, 'Header_LogoYandex')]");
     //кнопка Статус заказа
     private final By orderStatusButton = By.xpath("//button[contains(@class, 'Header_Link') and normalize-space(text())='Статус заказа']");
@@ -43,9 +44,15 @@ public class SamokatMainPage {
         String questionXpath = String.format(accordionTextHeadingTemplate, accordionQuestionText);
         By questionLocator = By.xpath(questionXpath);
 
-        new WebDriverWait(driver, Duration.ofSeconds(15))
-                .until(ExpectedConditions.elementToBeClickable(questionLocator))
-                .click();
+        try {
+            new WebDriverWait(driver, Duration.ofSeconds(15))
+                    .until(ExpectedConditions.elementToBeClickable(questionLocator))
+                    .click();
+        } catch (TimeoutException e) {
+            throw new AssertionError("Не удалось найти или кликнуть по вопросу аккордеона! " +
+                    "Возможно, на сайте изменился текст вопроса или в нём допущена ошибка. \n" +
+                    "Ожидаемый текст: '" + accordionQuestionText + "'");
+        }
     }
 
     public String getAccordionPanelText(String accordionQuestionText) {
@@ -65,9 +72,15 @@ public class SamokatMainPage {
         String questionXpath = String.format(accordionTextHeadingTemplate, accordionQuestionText);
         By questionLocator = By.xpath(questionXpath);
 
-        WebElement element = new WebDriverWait(driver, Duration.ofSeconds(15))
-                .until(ExpectedConditions.presenceOfElementLocated(questionLocator));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({behavior: 'instant', block: 'center'});", element);
+        try {
+            WebElement element = new WebDriverWait(driver, Duration.ofSeconds(15))
+                    .until(ExpectedConditions.presenceOfElementLocated(questionLocator));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({behavior: 'instant', block: 'center'});", element);
+        } catch (TimeoutException e) {
+            throw new AssertionError("Не удалось проскроллить до вопроса аккордеона! " +
+                    "Возможно, на сайте изменился текст вопроса или в нём допущена ошибка. \n" +
+                    "Ожидаемый текст: '" + accordionQuestionText + "'");
+        }
     }
 
     public void cookieConfirmationButtonClick () {
